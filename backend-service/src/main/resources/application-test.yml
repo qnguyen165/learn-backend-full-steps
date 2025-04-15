@@ -3,16 +3,41 @@ spring:
     activate:
       on-profile: test
   devtools:
-    add-properties: true
+    restart:
+      enabled: false
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
+      cache:
+        use_second_level_cache: true
+        region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+  datasource:
+    datasource:
+      url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      driver-class-name: org.h2.Driver
+      username: sa
+      password:
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 30
+      idle-timeout: 30000
+      max-lifetime: 1800000
+  main:
+    banner-mode: off
+  sendgrid:
+    api-key: dummy-for-tests
+    from-email: dummy-for-tests
+    from-name: dummy-for-tests
+    verification-template-id: dummy-for-tests
+    verification-link: dummy-for-tests
 
+
+# application-test.yml
 springdoc:
   api-docs:
     enabled: true
@@ -24,3 +49,9 @@ openapi:
     server: ${BACKEND_SERVICE:http://localhost:${server.port}}
     title: Backend service
     version: 1.0.0
+
+jwt:
+  expiry-minutes: 1000
+  expiry-days: 1000
+  access-key: dummy-for-tests
+  refresh-key: dummy-for-tests
