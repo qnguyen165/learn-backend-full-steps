@@ -3,16 +3,19 @@ package com.qnguyendev.backendservice.controller;
 import com.qnguyendev.backendservice.common.Gender;
 import com.qnguyendev.backendservice.dto.response.UserPageResponse;
 import com.qnguyendev.backendservice.dto.response.UserResponse;
+
 import com.qnguyendev.backendservice.service.CustomUserDetailsService;
 import com.qnguyendev.backendservice.service.JwtService;
 import com.qnguyendev.backendservice.service.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,14 +37,32 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @Autowired
     private UserService userService;
 
-    @Mock
+    @Autowired
+    private JwtService jwtService; // Mocked bean for tests
+
+    @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    @Mock
-    private JwtService jwtService; // Mocked bean for tests
+    @TestConfiguration
+    static class MockConfig {
+        @Bean
+        UserService userService() {
+            return Mockito.mock(UserService.class);
+        }
+
+        @Bean
+        JwtService jwtService() {
+            return Mockito.mock(JwtService.class);
+        }
+
+        @Bean
+        CustomUserDetailsService customUserDetailsService() {
+            return Mockito.mock(CustomUserDetailsService.class);
+        }
+    }
 
     private static UserResponse tayJava;
     private static UserResponse johnDoe;

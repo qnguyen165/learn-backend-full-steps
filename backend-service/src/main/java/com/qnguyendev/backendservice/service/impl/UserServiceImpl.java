@@ -8,6 +8,7 @@ import com.qnguyendev.backendservice.dto.response.UserPageResponse;
 import com.qnguyendev.backendservice.dto.response.UserResponse;
 import com.qnguyendev.backendservice.entity.Address;
 import com.qnguyendev.backendservice.entity.User;
+import com.qnguyendev.backendservice.exeception.InvalidDataException;
 import com.qnguyendev.backendservice.exeception.ResourceNotFoundException;
 import com.qnguyendev.backendservice.repository.AddressRepository;
 import com.qnguyendev.backendservice.repository.UserRepository;
@@ -114,6 +115,12 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public long save(UserCreationRequest req) {
         log.info("Saving user: {}", req);
+
+        User userByEmail = userRepository.findByEmail(req.getEmail());
+        if (userByEmail != null) {
+            throw new InvalidDataException("Email already exists");
+        }
+
         User user = new User();
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());
@@ -124,36 +131,38 @@ public class UserServiceImpl implements UserService {
         user.setUsername(req.getUsername());
         user.setType(req.getType());
         user.setStatus(UserStatus.NONE);
-        userRepository.save(user);
+
+        User result = userRepository.save(user);
         log.info("Saved user: {}", user);
 
-        if (user.getId() != null) {
-            log.info("user id: {}", user.getId());
+        if (result.getId() != null) {
+            log.info("user id: {}", result.getId());
             List<Address> addresses = new ArrayList<>();
-            req.getAddresses().forEach(a -> {
-                Address address = new Address();
-                address.setApartmentNumber(a.getApartmentNumber());
-                address.setFloor(a.getFloor());
-                address.setBuilding(a.getBuilding());
-                address.setStreetNumber(a.getStreetNumber());
-                address.setStreet(a.getStreet());
-                address.setCity(a.getCity());
-                address.setCountry(a.getCountry());
-                address.setAddressType(a.getAddressType());
-                address.setUser(user);
-                addresses.add(address);
+            req.getAddresses().forEach(address -> {
+                Address addressEntity = new Address();
+                addressEntity.setApartmentNumber(address.getApartmentNumber());
+                addressEntity.setFloor(address.getFloor());
+                addressEntity.setBuilding(address.getBuilding());
+                addressEntity.setStreetNumber(address.getStreetNumber());
+                addressEntity.setStreet(address.getStreet());
+                addressEntity.setCity(address.getCity());
+                addressEntity.setCountry(address.getCountry());
+                addressEntity.setAddressType(address.getAddressType());
+                addressEntity.setUser(result);
+                addresses.add(addressEntity);
             });
             addressRepository.saveAll(addresses);
             log.info("Saved addresses: {}", addresses);
         }
 
+        // Send email verification
         try {
             emailService.emailVerification(req.getEmail(), req.getUsername());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new InvalidDataException("Send email failed");
         }
 
-        return user.getId();
+        return result.getId();
     }
 
     @Override
