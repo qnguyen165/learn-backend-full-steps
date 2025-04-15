@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <!-- This defines a custom log appender named "logstash", which sends log events to a Logstash server over TCP -->
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- <destination>localhost:5600</destination>--> <!--local env-->
+        <destination>${LOGSTASH_HOST:-localhost:5600}</destination> <!--docker env-->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <mdc/> <!--  Includes MDC (Mapped Diagnostic Context) data, e.g. request IDs -->
+                <context/> <!--  Includes logger context info -->
+                <logLevel/> <!--  INFO, DEBUG, etc -->
+                <loggerName/> <!--  The name of the logger (usually the class name) -->
+                <pattern> <!-- Adds custom static fields -->
+                    <pattern>
+                        {
+                        "appName": "backend-service"
+                        }
+                    </pattern>
+                </pattern>
+                <customFields>{"appName":"backend-service"}</customFields>
+                <threadName/> <!--  Thread name (useful for debugging) -->
+                <message/> <!--  The actual log message -->
+                <logstashMarkers/> <!--  Adds extra metadata for Logstash (e.g. spans, tags) -->
+                <stackTrace/> <!--  Adds stack traces in JSON when an exception is logged -->
+            </providers>
+        </encoder>
+    </appender>
+    <root level="info">
+        <appender-ref ref="logstash"/>
+    </root>
+</configuration>

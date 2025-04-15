@@ -1,0 +1,40 @@
+spring:
+ config:
+  activate:
+   on-profile: dev
+ devtools:
+  add-properties: true
+ datasource:
+  url: ${POSTGRES_URL:jdbc:postgresql://localhost:5434/backend_service}
+  username: ${POSTGRES_USER:qnguyen}
+  password: ${POSTGRES_PASSWORD:secret}
+ jpa:
+   properties:
+    hibernate:
+     dialect: org.hibernate.dialect.PostgreSQLDialect
+   show_sql: false
+   hibernate:
+    ddl-auto: update
+ sendgrid:
+    api-key: ${SENDGRID_API_KEY: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}
+    from-email: ${SENDGRID_FROM_EMAIL:qhuy.nguyen.1605@gmail.com}
+    from-name: ${SENDGRID_FROM_NAME:qnguyen-dev}
+    verification-template-id: ${SENDGRID_VERIFICATION_TEMPLATE_ID:d-d65056d55511427ebf9ea3c25eae51df}
+    verification-link: ${SENDGRID_VERIFICATION_LINK:http://localhost:8080/user/confirm-email}
+
+springdoc:
+ api-docs:
+  enabled: true
+ swagger-ui:
+  enabled: true
+openapi:
+ service:
+  api-docs: backend-service
+  server: http://localhost:${server.port}
+  title: Backend service
+  version: 1.0.0
+jwt:
+  expiry-minutes: 60
+  expiry-days: 7
+  access-key: ${JWT_ACCESS_KEY:0r0dq2mlXct5CpP6T0tTbaqP3Jhaa8y1xc9LH4C3n8k/5JCaDF4QI+zBRAKKHGLS}
+  refresh-key: ${JWT_REFRESH_KEY:G1JWS4SCzrelivMdU5IeMBnk6x1nHKzKsWuqPKh2aFabw707dXbqWsTWNFV1Q9q4}
