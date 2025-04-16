@@ -112,22 +112,44 @@ services:
       - grafana:/var/lib/grafana
 
   jenkins:
-    image: jenkins/jenkins:latest-jdk21
+    # image: jenkins/jenkins:latest-jdk21
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    container_name: bs_jenkins
     privileged: true
     user: root
     ports:
       - '7080:8080'
       - '50000:50000'
-    container_name: bs_jenkins
     volumes:
         #  This mounts the Jenkins home directory to a local directory on the host machine.
       - ~/jenkins-data:/var/jenkins_home
         #  This allows Jenkins to run Docker commands inside the container. It mounts the Docker socket from the host into the container.
       - /var/run/docker.sock:/var/run/docker.sock
         #  This allows Jenkins to use the Docker CLI installed on the host.
-      - /usr/local/bin/docker:/usr/local/bin/docker
+      # - /usr/local/bin/docker:/usr/local/bin/docker
+    networks:
+      - bridge
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: bs_sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_USERNAME: qnguyen
+      SONAR_JDBC_PASSWORD: secret
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - bridge
 
 networks:
+  bridge:
+    driver: bridge
   default:
     name: backend-service
 
@@ -135,3 +157,6 @@ volumes:
   mysql_data:
   postgres:
   grafana:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:

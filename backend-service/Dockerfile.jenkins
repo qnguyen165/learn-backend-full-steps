@@ -1,0 +1,11 @@
+FROM jenkins/jenkins:latest-jdk21
+
+USER root
+
+# Create a docker group matching host GID (usually 998, verify with `getent group docker`)
+RUN groupadd -g 998 docker && usermod -aG docker jenkins
+
+# Install Docker CLI (optional but recommended)
+RUN apt-get update && apt-get install -y docker.io
+
+USER jenkins
